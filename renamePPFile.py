@@ -108,13 +108,20 @@ def getProfileInfoBundleId(profilePath):
 			
 
 
-def renameProfiles(floder):
+def renameProfiles(floder, comparedFloder = None):
+	not_exists_in_target = None
+	if comparedFloder:
+		not_exists_in_target = []
+		targetFileNames = filter(lambda s: s.endswith('.mobileprovision'), os.listdir(comparedFloder))
+
 	if os.path.isdir(floder):
 		for filename in os.listdir(floder):
 			if filename.endswith('.mobileprovision'):
 				source = os.path.join(floder, filename)
 				target = os.path.join(floder, getProfileInfoBundleId(source) + '.mobileprovision')
 				os.rename(source, target)
+				if comparedFloder and (os.path.basename(target) not in targetFileNames):
+					not_exists_in_target.append(os.path.basename(target))
 
 	else:
 		raise Exception('Please enter a floder path')
@@ -127,12 +134,21 @@ def renameProfiles(floder):
 == ADHOC: %s
 ============================================
 	''' % (nor_dev_count+inHouse_dev_count+nor_dis_count+inHouse_dis_count+nor_adhoc_count, nor_dev_count+inHouse_dev_count, nor_dev_count, inHouse_dev_count, nor_dis_count+inHouse_dis_count, nor_dis_count, inHouse_dis_count, nor_adhoc_count)
+
+	if not_exists_in_target:
+		print('\n*** Results not in comparedFloder ***')
+		for name in not_exists_in_target:
+			print('\t%s' % name)
+
 	
 
 if __name__ == '__main__':
-	# floder = sys.argv[1]
 	floder = sys.argv[1]
-	renameProfiles(floder)
+	try:
+		comparedFloder = sys.argv[2]
+	except Exception as e:
+		comparedFloder = None
+	renameProfiles(floder, comparedFloder)
 
 
 
